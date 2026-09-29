@@ -1,0 +1,78 @@
+{
+  "name": "md-github-anchor",
+  "displayName": "Markdown GitHub Anchor",
+  "description": "Support GitHub-style line-range anchors (path/file.md#L12-L15) in markdown links: click to jump & highlight the target lines, and copy anchor links from the current selection.",
+  "version": "0.1.0",
+  "publisher": "frcoder-lh",
+  "license": "MIT",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frcoder-lh/md-github-anchor.git"
+  },
+  "homepage": "https://github.com/frcoder-lh/md-github-anchor",
+  "bugs": {
+    "url": "https://github.com/frcoder-lh/md-github-anchor/issues"
+  },
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Other",
+    "Markdown"
+  ],
+  "keywords": [
+    "markdown",
+    "anchor",
+    "github",
+    "line-range",
+    "link"
+  ],
+  "activationEvents": [
+    "onLanguage:markdown",
+    "onCommand:md-github-anchor.openAnchor",
+    "onCommand:md-github-anchor.copyAnchor"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "md-github-anchor.openAnchor",
+        "title": "Open GitHub-Style Anchor Link",
+        "category": "Markdown Anchor"
+      },
+      {
+        "command": "md-github-anchor.copyAnchor",
+        "title": "Copy GitHub Anchor Link (path.md#L12-L15)",
+        "category": "Markdown Anchor"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "md-github-anchor.copyAnchor",
+        "key": "ctrl+shift+g",
+        "when": "editorTextFocus && editorLangId == 'markdown'"
+      }
+    ],
+    "markdown": {
+      "markdownItPlugins": [
+        {
+          "name": "md-github-anchor"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "test": "tsc -p ./ && node test/anchor.test.js",
+    "package": "vsce package --no-dependencies --baseContentUrl https://raw.githubusercontent.com/doubao/md-github-anchor/main/"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.84.0",
+    "@vscode/vsce": "^4.0.0",
+    "markdown-it": "^15.0.2",
+    "typescript": "^5.4.0"
+  }
+}

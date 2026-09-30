@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
 import { AnchorLinkProvider } from './linkProvider';
-import { copyAnchor, disposeAnchorResources, openAnchor } from './commands';
-import { createAnchorPlugin, MinimalMarkdownIt } from './markdownPlugin';
+import { copyAnchor, disposeAnchorResources, openAnchor, registerFragmentAnchorListener } from './commands';
 
-export function activate(context: vscode.ExtensionContext): { extendMarkdownIt: (md: MinimalMarkdownIt) => MinimalMarkdownIt } {
+export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('md-github-anchor.openAnchor', (arg?: unknown) => {
       let href: string | undefined;
@@ -23,17 +22,8 @@ export function activate(context: vscode.ExtensionContext): { extendMarkdownIt: 
     )
   );
 
-  /**
-   * Contributed via `contributes.markdown.markdownItPlugins: true`.
-   * Rewrites GitHub-style anchor links in the Markdown preview to
-   * `command:` URIs so clicking them executes `md-github-anchor.openAnchor`.
-   */
-  return {
-    extendMarkdownIt(md: MinimalMarkdownIt): MinimalMarkdownIt {
-      createAnchorPlugin()(md);
-      return md;
-    },
-  };
+  // Highlight the line range when the preview opens an anchor link.
+  registerFragmentAnchorListener(context);
 }
 
 export function deactivate(): void {

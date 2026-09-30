@@ -65,8 +65,8 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -w -p ./",
-    "test": "tsc -p ./ && node test/anchor.test.js",
-    "package": "vsce package --no-dependencies --baseContentUrl https://raw.githubusercontent.com/doubao/md-github-anchor/main/"
+    "test": "tsc -p ./ && node test/anchor.test.js && node test/linkprovider.test.js",
+    "package": "vsce package --no-dependencies --baseContentUrl https://raw.githubusercontent.com/frcoder-lh/md-github-anchor/main/"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

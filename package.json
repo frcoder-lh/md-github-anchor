@@ -2,7 +2,7 @@
   "name": "md-github-anchor",
   "displayName": "Markdown GitHub Anchor",
   "description": "Support GitHub-style line-range anchors (path/file.md#L12-L15) in markdown links: click to jump & highlight the target lines, and copy anchor links from the current selection.",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "publisher": "frcoder-lh",
   "license": "MIT",
   "icon": "icon.png",
@@ -31,7 +31,8 @@
   "activationEvents": [
     "onLanguage:markdown",
     "onCommand:md-github-anchor.openAnchor",
-    "onCommand:md-github-anchor.copyAnchor"
+    "onCommand:md-github-anchor.copyAnchor",
+    "onCommand:md-github-anchor.openPreview"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -45,6 +46,11 @@
         "command": "md-github-anchor.copyAnchor",
         "title": "Copy GitHub Anchor Link (path.md#L12-L15)",
         "category": "Markdown Anchor"
+      },
+      {
+        "command": "md-github-anchor.openPreview",
+        "title": "Open GitHub Anchor Preview (markdown-it rendered)",
+        "category": "Markdown Anchor"
       }
     ],
     "keybindings": [
@@ -52,6 +58,11 @@
         "command": "md-github-anchor.copyAnchor",
         "key": "ctrl+shift+g",
         "when": "editorTextFocus && editorLangId == 'markdown'"
+      },
+      {
+        "command": "md-github-anchor.openPreview",
+        "key": "ctrl+shift+h",
+        "when": "editorLangId == 'markdown'"
       }
     ],
     "markdown": {
@@ -65,13 +76,15 @@
     "compile": "tsc -p ./",
     "watch": "tsc -w -p ./",
     "test": "tsc -p ./ && node test/anchor.test.js && node test/linkprovider.test.js",
-    "package": "vsce package --no-dependencies --baseContentUrl https://raw.githubusercontent.com/frcoder-lh/md-github-anchor/main/"
+    "package": "vsce package --baseContentUrl https://raw.githubusercontent.com/frcoder-lh/md-github-anchor/main/"
+  },
+  "dependencies": {
+    "markdown-it": "^15.0.2"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@types/vscode": "^1.84.0",
     "@vscode/vsce": "^4.0.0",
-    "markdown-it": "^15.0.2",
     "typescript": "^5.4.0"
   }
 }

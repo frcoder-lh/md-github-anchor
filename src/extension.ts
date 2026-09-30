@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { AnchorLinkProvider } from './linkProvider';
 import { copyAnchor, disposeAnchorResources, openAnchor, registerFragmentAnchorListener } from './commands';
 import { createAnchorPlugin, MinimalMarkdownIt } from './markdownPlugin';
+import { disposePreview, openGitHubAnchorPreview } from './preview';
 
 export function activate(context: vscode.ExtensionContext): { extendMarkdownIt: (md: MinimalMarkdownIt) => MinimalMarkdownIt } {
   context.subscriptions.push(
@@ -16,6 +17,8 @@ export function activate(context: vscode.ExtensionContext): { extendMarkdownIt: 
     }),
 
     vscode.commands.registerCommand('md-github-anchor.copyAnchor', () => copyAnchor()),
+
+    vscode.commands.registerCommand('md-github-anchor.openPreview', () => openGitHubAnchorPreview(context)),
 
     vscode.languages.registerDocumentLinkProvider(
       { language: 'markdown', scheme: 'file' },
@@ -36,4 +39,5 @@ export function activate(context: vscode.ExtensionContext): { extendMarkdownIt: 
 
 export function deactivate(): void {
   disposeAnchorResources();
+  disposePreview();
 }

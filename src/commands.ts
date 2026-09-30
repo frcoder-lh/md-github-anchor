@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { AnchorTarget, buildAnchorFragment, parseAnchor } from './anchor';
+import { AnchorTarget, parseAnchor } from './anchor';
 
 /** Single temporary highlight decoration shared across calls. */
 let highlightDecoration: vscode.TextEditorDecorationType | undefined;
@@ -140,33 +140,6 @@ function flashHighlight(editor: vscode.TextEditor, range: vscode.Range): void {
       ed.setDecorations(deco, []);
     }
   }, 4000);
-}
-
-/** Copy a GitHub-style anchor link for the current selection, e.g. `docs/guide.md#L12-L15`. */
-export async function copyAnchor(): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor || editor.document.languageId !== 'markdown') {
-    vscode.window.showWarningMessage('Select lines in a Markdown file first.');
-    return;
-  }
-  const sel = editor.selection;
-  if (sel.isEmpty) {
-    vscode.window.showWarningMessage('Select at least one line to build an anchor link.');
-    return;
-  }
-  const fragment = buildAnchorFragment(sel.start.line + 1, sel.end.line + 1);
-  const rel = relativeToWorkspace(editor.document.uri);
-  const text = rel ? `${rel}${fragment}` : `${editor.document.uri.fsPath}${fragment}`;
-  await vscode.env.clipboard.writeText(text);
-  vscode.window.setStatusBarMessage(`$(link) Copied anchor: ${text}`, 4000);
-}
-
-function relativeToWorkspace(uri: vscode.Uri): string | undefined {
-  const folder = vscode.workspace.getWorkspaceFolder(uri);
-  if (!folder) {
-    return undefined;
-  }
-  return path.relative(folder.uri.fsPath, uri.fsPath).split(path.sep).join('/');
 }
 
 /** Dispose global decoration resources (called from deactivate). */

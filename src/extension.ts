@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { AnchorLinkProvider } from './linkProvider';
-import { copyAnchor, disposeAnchorResources, openAnchor } from './commands';
+import { disposeAnchorResources, openAnchor } from './commands';
 
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
@@ -13,8 +13,6 @@ export function activate(context: vscode.ExtensionContext): void {
       }
       return openAnchor(href);
     }),
-
-    vscode.commands.registerCommand('md-github-anchor.copyAnchor', () => copyAnchor()),
 
     vscode.languages.registerDocumentLinkProvider(
       { language: 'markdown', scheme: 'file' },

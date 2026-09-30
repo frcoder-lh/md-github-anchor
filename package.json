@@ -2,7 +2,7 @@
   "name": "md-github-anchor",
   "displayName": "Markdown GitHub Anchor",
   "description": "Support GitHub-style line-range anchors (path/file.md#L12-L15) in markdown links: click to jump & highlight the target lines, and copy anchor links from the current selection.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "frcoder-lh",
   "license": "MIT",
   "icon": "icon.png",
@@ -54,13 +54,7 @@
         "when": "editorTextFocus && editorLangId == 'markdown'"
       }
     ],
-    "markdown": {
-      "markdownItPlugins": [
-        {
-          "name": "md-github-anchor"
-        }
-      ]
-    }
+    "markdown.markdownItPlugins": true
   },
   "scripts": {
     "compile": "tsc -p ./",

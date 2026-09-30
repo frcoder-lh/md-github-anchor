@@ -3,7 +3,7 @@ import { AnchorLinkProvider } from './linkProvider';
 import { copyAnchor, disposeAnchorResources, openAnchor } from './commands';
 import { createAnchorPlugin, MinimalMarkdownIt } from './markdownPlugin';
 
-export function activate(context: vscode.ExtensionContext): void {
+export function activate(context: vscode.ExtensionContext): { extendMarkdownIt: (md: MinimalMarkdownIt) => MinimalMarkdownIt } {
   context.subscriptions.push(
     vscode.commands.registerCommand('md-github-anchor.openAnchor', (arg?: unknown) => {
       let href: string | undefined;
@@ -22,16 +22,20 @@ export function activate(context: vscode.ExtensionContext): void {
       new AnchorLinkProvider()
     )
   );
+
+  /**
+   * Contributed via `contributes.markdown.markdownItPlugins: true`.
+   * Rewrites GitHub-style anchor links in the Markdown preview to
+   * `command:` URIs so clicking them executes `md-github-anchor.openAnchor`.
+   */
+  return {
+    extendMarkdownIt(md: MinimalMarkdownIt): MinimalMarkdownIt {
+      createAnchorPlugin()(md);
+      return md;
+    },
+  };
 }
 
 export function deactivate(): void {
   disposeAnchorResources();
-}
-
-/**
- * Contributed to `contributes.markdown.markdownItPlugins` so the
- * Markdown preview honors GitHub-style anchor links.
- */
-export function provideMarkdownItPlugins(): { 'md-github-anchor': (md: MinimalMarkdownIt) => void } {
-  return { 'md-github-anchor': createAnchorPlugin() };
 }

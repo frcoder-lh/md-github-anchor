@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 jobs:
   publish:
@@ -31,10 +30,14 @@ jobs:
         run: npm test
 
       - name: Package VSIX
-        run: npx vsce package --no-dependencies
+        run: npx vsce package --no-dependencies --baseContentUrl https://raw.githubusercontent.com/frcoder-lh/md-github-anchor/main/
 
-      - name: Publish to Open VSX (trusted publishing)
-        run: npx ovsx publish md-github-anchor-*.vsix
+      - name: Publish to Open VSX
+        env:
+          OVSX_TOKEN: ${{ secrets.OVSX_TOKEN }}
+        run: |
+          VSIX=$(ls md-github-anchor-*.vsix | head -n 1)
+          npx ovsx publish "$VSIX" -p "$OVSX_TOKEN" --skip-duplicate
 
       - name: Attach VSIX to GitHub Release
         uses: softprops/action-gh-release@v2

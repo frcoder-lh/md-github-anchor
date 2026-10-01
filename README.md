@@ -25,4 +25,23 @@ VS Code 原生既不识别这种链接（点击无反应），也没有在预览
 [单行](docs/guide.md#L42)
 ```
 
-点击（编辑器内 `Ctrl/Cmd+Click`，或预览中直接点击）即可跳转到目标文件并高亮对应行区间。
+在编辑器里按住 `Ctrl/Cmd` 点击链接，即可跳转到目标文件并高亮对应行区间。
+
+## 安装
+
+- **Open VSX**（Trae / code-server / Theia / Gitpod 默认市场）：<https://open-vsx.org/extension/frcoder-lh/md-github-anchor>
+- **GitHub Release**（手动安装 `.vsix`）：<https://github.com/frcoder-lh/md-github-anchor/releases>
+- 在 Trae / VS Code 扩展市场搜索 `md-github-anchor` 亦可。
+
+## 发布
+
+版本号在 `package.json` 的 `version` 字段；更新后通过 **GitHub Actions 自动发布**到 Open VSX 与 GitHub Release：
+
+1. 修改 `version`（如 `1.0.0` → `1.0.1`），提交并推送。
+2. 打 tag：`git tag v1.0.1 && git push origin tag v1.0.1`
+3. 或手动触发：仓库 **Actions → Publish → Run workflow**。
+
+流水线 `.github/workflows/publish.yml` 会：`npm ci` → 编译 → 单测 → 打包 → `ovsx publish`（Open VSX）→ 上传 `.vsix` 到 GitHub Release。
+
+> 需要发布权限时，在仓库 **Settings → Secrets → Actions** 配置 `OVSX_TOKEN`（open-vsx.org 生成的 Personal Access Token）。Open VSX 不允许覆盖同一版本，重复发布会因 `--skip-duplicate` 自动跳过。
+

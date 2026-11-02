@@ -1,61 +1,46 @@
 # AGENTS — 发布操作指令
 
-当用户说「**发布**」「**发版**」「**重新发布**」「**发新版本**」或提及"发布"时，按本文件流程执行。
+当用户说「**发布**」「**发版**」「**发新版本**」时，按本文件执行。
 
-## 一、确定版本号
+## 发版步骤
 
-1. 读取根目录 `package.json` 的 `version` 字段作为当前版本（当前基准：`1.0.0`）。
-2. 二选一：
-   - 用户**没有**给出版本号 → 自动把 `patch` +1（例如 `1.0.0` → `1.0.1`；`1.0.5` → `1.0.6`）。
-   - 用户**给出**了版本号 → 使用用户给的（格式须为 `X.Y.Z` 或 `X.Y.Z-n`，tag 统一加 `v` 前缀）。
-3. 更新 `package.json` 的 `version` 字段，并同步更新 README / 相关元数据中的版本号（若提及）。
+1. **定版本**：读 `package.json` 的 `version`，patch +1（用户指定则用用户的）。
+2. **改版本号**：`package.json` 的 `version` 字段。
+3. **本地验证**：`npm test`（anchor + linkprovider 全绿）。
+4. **提交打 tag**：
+   ```bash
+   git add -A && git commit -m "release: v<X.Y.Z>"
+   git tag v<X.Y.Z>
+   git push origin main && git push origin v<X.Y.Z>
+   ```
 
-## 二、本地验证与打包
+推送 `v*` tag 触发 GitHub Actions，自动完成：
 
-在项目根目录执行，全部通过后才可发布：
-
-```bash
-npm test                 # 编译 + 单测（anchor 13 / linkprovider 12 全绿）
-npm run package          # 产出 md-github-anchor-<X.Y.Z>.vsix
+```
+build ──┬── publish-openvsx ──┐
+        └── publish-vsmarketplace ──┴── github-release
 ```
 
-## 三、提交并触发流水线
+两个市场并行发布，互不阻塞；都成功后才附 GitHub Release。
 
-```bash
-git add -A
-git commit -m "release: v<X.Y.Z>"
-git push origin master:main
-git tag v<X.Y.Z>
-git push origin tag v<X.Y.Z>
-```
+## 交付链接
 
-推送 `v*` tag 会触发 GitHub Actions `Publish` workflow（`.github/workflows/publish.yml`），它自动完成：
+- Open VSX：<https://open-vsx.org/extension/frcoder-lh/md-github-anchor>
+- VS Marketplace：<https://marketplace.visualstudio.com/items?itemName=frcoder-lh.md-github-anchor>
+- Release：<https://github.com/frcoder-lh/md-github-anchor/releases/tag/v<X.Y.Z>>
 
-1. `npm ci` → 编译 → 单测 → 打包。
-2. `ovsx publish --trusted-publishing`（发布到 **Open VSX**，使用 OIDC 可信发布，无需 token）。
-3. `vsce publish --oidc`（发布到 **VS Code Marketplace**，使用可信发布/OIDC，无需 PAT）。
-4. `softprops/action-gh-release` 创建 **GitHub Release** 并附上 `.vsix`。
+## 踩坑记录
 
-等待 workflow 完成后，向用户交付：
-- Open VSX 扩展页：<https://open-vsx.org/extension/frcoder-lh/md-github-anchor>
-- VS Code Marketplace 扩展页：<https://marketplace.visualstudio.com/items?itemName=frcoder-lh.md-github-anchor>
-- GitHub Release 页：<https://github.com/frcoder-lh/md-github-anchor/releases/tag/v<X.Y.Z>>
-- 最新 `.vsix` 文件
+| 问题 | 原因 | 解法 |
+|------|------|------|
+| `ovsx: unknown option --trusted-publishing` | npx 拉到旧版 ovsx | workflow 中显式写 `npx ovsx@1.3.0` |
+| `vsce: Invalid version xxx.vsix` | 位置参数传 vsix 文件，`--oidc` 不兼容 | 用 `--packagePath "$VSIX"` |
+| `vsce: unknown option --oidc` | 本地 devDependency 的 vsce 太旧 | 发布 job 用 `npx @vscode/vsce@4.1.0` |
+| `category 'Markdown' is not available` | VS Marketplace 不认此分类 | categories 用 `Other` / `Programming Languages` |
+| README 链接被重写成 GitHub blob URL | vsce 自动重写 `[文字](相对路径)`，**代码块里也不放过** | README 示例避开 `[文字](路径)` 写法，用空格分隔或纯代码块 |
+| `--baseContentUrl` 影响文字链接 | 它重写所有链接 | 用 `--baseImagesUrl` 只重写图片 |
 
-## 四、备选：仅发 Open VSX（不建 GitHub Release）
+## 前提
 
-无 tag 时可用手动触发：
-
-```bash
-gh workflow run publish.yml --repo frcoder-lh/md-github-anchor
-```
-
-此时只发布到 Open VSX，`Attach VSIX to GitHub Release` 步骤会因无 tag 跳过。
-
-## 五、注意事项
-
-- **Open VSX 不允许覆盖同一版本**：重复发布同一版本会因 `--skip-duplicate` 自动跳过（不算失败）。
-- **版本号语义**：补丁修复 `+1`；新功能/破坏性变更按语义化版本（SemVer）调整 `minor` / `major`，用户有明确要求时按用户要求。
-- **发布前确认**：`package.json` 的 `publisher` 为 `frcoder-lh`，`repository` 指向 `frcoder-lh/md-github-anchor`，否则发布会失败。
-- **可信发布前提**：已在 Open VSX Settings → Trusted Publishers 和 VS Marketplace publisher 管理页配置了对应策略（owner=`frcoder-lh`、repo=`md-github-anchor`、workflow=`publish.yml`）。
-- 若发布失败，先读 workflow 日志定位（多为版本重复、可信发布策略未配置、网络）。
+- 可信发布（OIDC）已在 Open VSX 和 VS Marketplace publisher 页面配置好（owner=`frcoder-lh`、repo=`md-github-anchor`、workflow=`publish.yml`），仓库无需存任何 token secret。
+- Git 提交身份：`frcoder-lh <frcoder.lh@hotmail.com>`。

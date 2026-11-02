@@ -32,11 +32,13 @@ git push origin tag v<X.Y.Z>
 推送 `v*` tag 会触发 GitHub Actions `Publish` workflow（`.github/workflows/publish.yml`），它自动完成：
 
 1. `npm ci` → 编译 → 单测 → 打包。
-2. `ovsx publish`（发布到 **Open VSX**，用 secret `OVSX_TOKEN`，`--skip-duplicate` 防版本冲突）。
-3. `softprops/action-gh-release` 创建 **GitHub Release** 并附上 `.vsix`。
+2. `ovsx publish --trusted-publishing`（发布到 **Open VSX**，使用 OIDC 可信发布，无需 token）。
+3. `vsce publish --oidc`（发布到 **VS Code Marketplace**，使用可信发布/OIDC，无需 PAT）。
+4. `softprops/action-gh-release` 创建 **GitHub Release** 并附上 `.vsix`。
 
 等待 workflow 完成后，向用户交付：
 - Open VSX 扩展页：<https://open-vsx.org/extension/frcoder-lh/md-github-anchor>
+- VS Code Marketplace 扩展页：<https://marketplace.visualstudio.com/items?itemName=frcoder-lh.md-github-anchor>
 - GitHub Release 页：<https://github.com/frcoder-lh/md-github-anchor/releases/tag/v<X.Y.Z>>
 - 最新 `.vsix` 文件
 
@@ -54,5 +56,6 @@ gh workflow run publish.yml --repo frcoder-lh/md-github-anchor
 
 - **Open VSX 不允许覆盖同一版本**：重复发布同一版本会因 `--skip-duplicate` 自动跳过（不算失败）。
 - **版本号语义**：补丁修复 `+1`；新功能/破坏性变更按语义化版本（SemVer）调整 `minor` / `major`，用户有明确要求时按用户要求。
-- **发布前确认**：`package.json` 的 `publisher` 为 `frcoder-lh`，`repository` 指向 `frcoder-lh/md-github-anchor`，否则 Open VSX 发布会失败。
-- 若发布失败，先读 workflow 日志定位（多为版本重复、token 失效、网络）。
+- **发布前确认**：`package.json` 的 `publisher` 为 `frcoder-lh`，`repository` 指向 `frcoder-lh/md-github-anchor`，否则发布会失败。
+- **可信发布前提**：已在 Open VSX Settings → Trusted Publishers 和 VS Marketplace publisher 管理页配置了对应策略（owner=`frcoder-lh`、repo=`md-github-anchor`、workflow=`publish.yml`）。
+- 若发布失败，先读 workflow 日志定位（多为版本重复、可信发布策略未配置、网络）。

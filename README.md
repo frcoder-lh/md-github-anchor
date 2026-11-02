@@ -25,11 +25,27 @@ VS Code 原生既不识别这种链接（点击无反应），也没有在预览
 [单行](docs/guide.md#L42)
 ```
 
+**裸文本锚点**：无需写 `[]()`，直接在正文里写路径即可被识别为可点击链接：
+
+```
+详见 src/commands.ts#L12-L15 即可跳转。
+也可以直接写 demo/target.md#L3 或 #L1-L2。
+```
+
+插件会自动识别以下三种形式：
+
+| 形式 | 示例 | 说明 |
+|------|------|------|
+| 行内链接 | `[文字](src/file.ts#L12-L15)` | 标准 Markdown 链接 |
+| 自动链接 | `<src/file.ts#L12-L15>` | 尖括号包裹 |
+| **裸文本** | `src/file.ts#L12-L15` | 正文中直接书写 |
+
 在编辑器里按住 `Ctrl/Cmd` 点击链接，即可跳转到目标文件并高亮对应行区间。
 
 ## 安装
 
+- **VS Code Marketplace**（VS Code / Cursor 默认市场）：<https://marketplace.visualstudio.com/items?itemName=frcoder-lh.md-github-anchor>
 - **Open VSX**（Trae / code-server / Theia / Gitpod 默认市场）：<https://open-vsx.org/extension/frcoder-lh/md-github-anchor>
 - **GitHub Release**（手动安装 `.vsix`）：<https://github.com/frcoder-lh/md-github-anchor/releases>
-- 在 Trae / VS Code 扩展市场搜索 `md-github-anchor` 亦可。
+- 在 VS Code / Trae 扩展市场搜索 `md-github-anchor` 亦可。
 

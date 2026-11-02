@@ -63,7 +63,7 @@ jobs:
       - name: Publish to VS Code Marketplace (Trusted Publishing)
         run: |
           VSIX=$(ls md-github-anchor-*.vsix | head -n 1)
-          npx vsce publish --packagePath "$VSIX" --oidc
+          npx @vscode/vsce@4.1.0 publish --packagePath "$VSIX" --oidc
 
   github-release:
     needs: [publish-openvsx, publish-vsmarketplace]

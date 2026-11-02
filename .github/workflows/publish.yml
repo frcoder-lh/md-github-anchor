@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,15 +33,45 @@ jobs:
       - name: Package VSIX
         run: npx vsce package --no-dependencies --baseContentUrl https://raw.githubusercontent.com/frcoder-lh/md-github-anchor/main/
 
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix
+          path: md-github-anchor-*.vsix
+
+  publish-openvsx:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: vsix
+
       - name: Publish to Open VSX (Trusted Publishing)
         run: |
           VSIX=$(ls md-github-anchor-*.vsix | head -n 1)
           npx ovsx@1.3.0 publish "$VSIX" --trusted-publishing --skip-duplicate
 
+  publish-vsmarketplace:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: vsix
+
       - name: Publish to VS Code Marketplace (Trusted Publishing)
         run: |
           VSIX=$(ls md-github-anchor-*.vsix | head -n 1)
           npx vsce publish --packagePath "$VSIX" --oidc
+
+  github-release:
+    needs: [publish-openvsx, publish-vsmarketplace]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: vsix
 
       - name: Attach VSIX to GitHub Release
         uses: softprops/action-gh-release@v2
